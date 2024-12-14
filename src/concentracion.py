@@ -2,20 +2,22 @@ import pandas as pd
 import folium
 import sys
 import json
-from pathlib import Path
+import os
 
-def crear_mapa(coordenadas):
+def crear_mapa(datos):
     try:
-        # Asegurarnos que el directorio public existe
-        Path("public").mkdir(exist_ok=True)
+        # Extraer lat y lon de los datos
+        lat = float(datos['lat'])
+        lon = float(datos['lon'])
         
         # Leer el CSV
-        df = pd.read_csv('XVPCA_info_sconco3_2023.csv')
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        csv_path = os.path.join(script_dir, 'XVPCA_info_sconco3_2023.csv')
+        df = pd.read_csv(csv_path)
 
-        # Normalizar los guiones
         df['type'] = df['type'].str.replace('–', '-')
 
-        # Diccionario de colores con guión normal
+        # Diccionario de colores
         colores = {
             'U - Urbana': 'red',
             'S - Suburbana': 'blue',
@@ -23,10 +25,10 @@ def crear_mapa(coordenadas):
             'F - Fons': 'purple'
         }
 
-        # Crear un mapa centrado en Cataluña
+        # Crear mapa centrado en la ubicación del usuario
         mapa = folium.Map(
-            location=[41.5912, 1.5206],
-            zoom_start=8
+            location=[lat, lon],
+            zoom_start=10
         )
 
         # Añadir marcadores para cada estación
@@ -39,33 +41,50 @@ def crear_mapa(coordenadas):
                 fill=True
             ).add_to(mapa)
 
-        # Añadir marcadores para las coordenadas del usuario
-        if isinstance(coordenadas, dict):
-            coordenadas = [coordenadas]  # Convertir un solo punto en lista
-            
-        for coord in coordenadas:
-            folium.Circle(
-                location=[float(coord['lat']), float(coord['lon'])],
-                radius=10000,
-                popup=f"Lat: {coord['lat']}, Lon: {coord['lon']}",
-                color='orange',
-                fill=True,
-                fill_opacity=0.6
-            ).add_to(mapa)
+        # Añadir marcador del usuario
+        folium.Circle(
+            location=[lat, lon],
+            radius=10000,
+            popup=f"Tu ubicación<br>Lat: {lat}, Lon: {lon}",
+            color='orange',
+            fill=True,
+            fill_opacity=0.6
+        ).add_to(mapa)
+
+        # Añadir leyenda
+        legend_html = '''
+        <div style="position: fixed; 
+                    bottom: 50px; 
+                    right: 50px; 
+                    z-index: 1000;
+                    background-color: white;
+                    padding: 10px;
+                    border: 2px solid grey;
+                    border-radius: 5px">
+            <p><b>Tipos de estaciones:</b></p>
+            <p>
+                <i style="background: red; width: 15px; height: 15px; display: inline-block; border-radius: 50%;"></i> U - Urbana<br>
+                <i style="background: blue; width: 15px; height: 15px; display: inline-block; border-radius: 50%;"></i> S - Suburbana<br>
+                <i style="background: green; width: 15px; height: 15px; display: inline-block; border-radius: 50%;"></i> R - Rural<br>
+                <i style="background: purple; width: 15px; height: 15px; display: inline-block; border-radius: 50%;"></i> F - Fons<br>
+                <i style="background: orange; width: 15px; height: 15px; display: inline-block; border-radius: 50%;"></i> Tu ubicación
+            </p>
+        </div>
+        '''
+        mapa.get_root().html.add_child(folium.Element(legend_html))
 
         # Guardar el mapa
         mapa.save('public/mapa_estaciones.html')
         return True, "Mapa creado exitosamente"
-        
     except Exception as e:
         return False, str(e)
 
 if __name__ == "__main__":
     try:
-        # Recibir coordenadas como argumento JSON
-        coordenadas_json = sys.argv[1]
-        coordenadas = json.loads(coordenadas_json)
-        success, message = crear_mapa(coordenadas)
+        # Leer datos de la entrada estándar
+        input_data = sys.stdin.read()
+        datos = json.loads(input_data)
+        success, message = crear_mapa(datos)
         if success:
             print(json.dumps({"status": "success", "message": message}))
             sys.exit(0)
