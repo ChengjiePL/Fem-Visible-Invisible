@@ -1,0 +1,79 @@
+.barra {
+  background: black;
+  height: 100vh; /* Cambia a 100vh para altura completa de la ventana */
+  width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 15px;
+  position: fixed; /* Añade esto para mantener la barra fija */
+  left: 0;
+  top: 0;
+}
+
+.dots {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 20px; /* Ajusta este valor según necesites */
+}
+
+/* Añade esto para el contenido principal */
+.main-content {
+  margin-left: 100px; /* El mismo ancho que la barra */
+  padding: 20px;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.dot:nth-child(1) {
+  background-color: #ffffff;
+}
+
+.dot:nth-child(2) {
+  background-color: #e0e0e0;
+}
+
+.dot:nth-child(3) {
+  background-color: #bdbdbd;
+}
+
+.icon {
+  color: grey;
+  width: 25px;
+  height: 25px;
+  margin-top: 35px;
+  transition:
+    transform 0.3s ease,
+    color 0.3s ease;
+}
+
+.icon:hover {
+  transform: scale(1.2);
+  color: #007bff; /* Cambia el color al pasar el ratón */
+}
+
+.mapa-overlay {
+  position: fixed;
+  top: 0;
+  left: 100px; /* ancho de la barra */
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 1000;
+}
+
+.mapa-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Añade hover effect al icono del mapa */
+.icon:hover {
+  cursor: pointer;
+  opacity: 0.8;
+}
