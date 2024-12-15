@@ -51,7 +51,7 @@ function Datos() {
 
       if (response.ok) {
         setMostrarMapa(true);
-        setMensaje("Mapa creado exitosamente");
+        // setMensaje("Mapa creado exitosamente");
         // Forzar recarga del iframe
         const timestamp = Date.now();
         setMapaUrl(`/mapa_estaciones.html?t=${timestamp}`);

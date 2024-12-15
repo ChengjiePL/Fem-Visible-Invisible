@@ -2,7 +2,6 @@ import pandas as pd
 import folium
 import sys
 import json
-import os
 
 def crear_mapa(datos):
     try:
