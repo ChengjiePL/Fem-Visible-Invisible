@@ -1,26 +1,11 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
-import calendar
-import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
-from sklearn.svm import SVR
-from geopy.distance import geodesic
 import pandas as pd
 from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
-import requests
-from datetime import datetime
-import geopandas as gpd
-
-from populationOffset import popOffset
 import no2_utils as no2_utils
 
 data_transformed = pd.read_csv("../Data/Data_Transformed.csv")
@@ -30,7 +15,11 @@ def predict_no2_concentration(lat, lon):
     print(f"Predint la concentració de NO2 per latitud: {lat}, longitud: {lon}")
 
     radius = 3
-    data_near = no2_utils.filter_by_radius(data_transformed, lat, lon, radius,6)
+    data_near = None
+    while(data_near is None or len(data_near) == 0):
+        print(radius)
+        data_near = no2_utils.filter_by_radius(data_transformed, lat, lon, radius,6)
+        radius= radius * 2
 
     
     print(f"Creant el model de predicció per al temps amb les dades de les estacions pròximes: ")
