@@ -1,7 +1,7 @@
 library(ncdf4)
 library(pracma)
+library(sf)
 wdir <- "../Data/"
-
 #PRUEBAS PROPIAS
 #Info del tipus de part de la ciutat que hi ha en una (lat, lon) concreta
 infoEstacions <- read.csv("XVPCA_info_sconcno2_2023.csv")
@@ -25,6 +25,18 @@ resultats <- data.frame(id = integer(),
                         concentration=double()) 
 View(resultats)
 nearest <- list(c(), c(), c(), c())
+for(i in 2:length(mesuresEstacions))
+{
+  mitja = mean(as.double(mesuresEstacions[[i]]), na.rm=TRUE)
+  for(j in 1:length(mesuresEstacions$Date))
+  {
+    if(is.na(mesuresEstacions[[i]][j]))
+    {
+      mesuresEstacions[[i]][j] = mitja
+    }
+  }
+}
+
 
 for(i in 1:length(infoEstacions$code))
 {
@@ -56,7 +68,7 @@ for(i in 1:nrow(mesuresEstacions))
   {
     sum = 0.0
     for(j in cl){
-      if(!is.na(mesuresEstacions[[j]][i]) && is.element(j, nearestCodes[[z]]))
+      if(is.element(j, nearestCodes[[z]]))
       {    
         total = mean( mesuresEstacions[[j]][i] + mesuresEstacions[[j]][i - 1] + mesuresEstacions[[j]][i + 1])
         sum = sum + total
@@ -66,21 +78,23 @@ for(i in 1:nrow(mesuresEstacions))
     conc = sum/length(cl)
     if(is.na(conc))
     {
-      conc = 16.5
+      conc = 16.2
     }
     index = (i-1) * 4 + z
     resultats[index,] <- list(index, mesuresEstacions$Date[i],
-                          estacions[[z]][1],
-                          estacions[[z]][2],
-                          conc)
+                              estacions[[z]][1],
+                              estacions[[z]][2],
+                              conc)
   }
 }
 
 X = resultats$date
 X = as.factor(X)
 Y = resultats$concentration
-dev.new() ; msgWindow(type="maximize") #Fem un resize de la window per mostrar la gràfica
-grafic = plot(X, Y, xlab = "date", ylab= "Contamination", ylim= c(0,50), las=2)
+windows() ; msgWindow(type="maximize")#Fem un resize de la window per mostrar la gràfica
+grafic = plot(X, Y,xlab="", ylab= "Concentration", las=2)
 
-
+#Escrivim els resultats en un fitxer csv
 write.csv(resultats, "./resultats.csv", quote = FALSE, row.names = FALSE)
+
+
